@@ -1,5 +1,5 @@
-import { Resend } from 'resend';
 import crypto from 'crypto';
+import { sendEmail } from './mailer';
 
 interface RegisterData {
   first_name: string;
@@ -204,24 +204,21 @@ export async function sendMagicLinkEmail(
   context: string,
   origin: string,
 ): Promise<void> {
-  const resend = new Resend(process.env['RESEND_API_KEY']);
-  const from = process.env['OTP_SENDER_EMAIL'] ?? 'onboarding@resend.dev';
   const link = `${origin}/auth/magic?token=${token}`;
   const site = process.env['NEXT_PUBLIC_SITE_NAME'] ?? 'Soft Solutions Store';
   const isCheckout = context === 'checkout';
 
-  const { error } = await resend.emails.send({
-    from,
-    to,
-    subject: isCheckout
-      ? `[${site}] Verify your email to complete your order`
-      : `[${site}] Verify your email address`,
-    html: buildEmail(link, context),
-  });
-
-  if (error) {
+  try {
+    await sendEmail({
+      to,
+      subject: isCheckout
+        ? `[${site}] Verify your email to complete your order`
+        : `[${site}] Verify your email address`,
+      html: buildEmail(link, context),
+    });
+  } catch (err) {
     // Log the error message but never log the token itself
-    console.error('[magic-link] Email send failed:', error.message);
-    throw new Error(error.message);
+    console.error('[magic-link] Email send failed:', err instanceof Error ? err.message : err);
+    throw new Error('Failed to send verification email.');
   }
 }

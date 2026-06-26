@@ -1,4 +1,4 @@
-import { Resend } from 'resend';
+import { sendEmail } from './mailer';
 
 interface OtpEntry {
   code: string;
@@ -86,16 +86,14 @@ export function buildOtpEmail(code: string): string {
 }
 
 export async function sendOtpEmail(to: string, code: string): Promise<void> {
-  const resend = new Resend(process.env['RESEND_API_KEY']);
-  const from = process.env['OTP_SENDER_EMAIL'] ?? 'onboarding@resend.dev';
-  const { error } = await resend.emails.send({
-    from,
-    to,
-    subject: 'Your verification code',
-    html: buildOtpEmail(code),
-  });
-  if (error) {
-    console.error('Resend error:', error);
-    throw new Error(error.message);
+  try {
+    await sendEmail({
+      to,
+      subject: 'Your verification code',
+      html: buildOtpEmail(code),
+    });
+  } catch (err) {
+    console.error('SMTP error:', err instanceof Error ? err.message : err);
+    throw new Error('Failed to send verification email.');
   }
 }
