@@ -8,6 +8,21 @@
   }
 }
 
+/* Product card CTA: always visible on touch; hover-reveal only on mouse-capable devices */
+@media (hover: hover) and (pointer: fine) {
+  .cart-reveal {
+    max-height: 0;
+    margin-top: 0 !important;
+    opacity: 0 !important;
+    transition: max-height 280ms cubic-bezier(0.4, 0, 0.2, 1), margin-top 280ms, opacity 220ms 80ms;
+  }
+  .cart-reveal[data-hov="true"] {
+    max-height: 44px;
+    margin-top: 8px !important;
+    opacity: 1 !important;
+  }
+}
+
 @layer base {
   :root {
     --background: oklch(1 0 0);

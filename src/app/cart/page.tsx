@@ -58,7 +58,7 @@ export default function CartPage() {
                   <div className="flex items-center border rounded-md">
                     <button
                       onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                      className="p-1.5 hover:bg-gray-100 transition-colors"
+                      className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 transition-colors"
                       aria-label="Decrease quantity"
                     >
                       <Minus size={14} />
@@ -66,7 +66,7 @@ export default function CartPage() {
                     <span className="px-3 text-sm font-medium">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                      className="p-1.5 hover:bg-gray-100 transition-colors"
+                      className="w-11 h-11 flex items-center justify-center hover:bg-gray-100 transition-colors"
                       aria-label="Increase quantity"
                     >
                       <Plus size={14} />
@@ -75,7 +75,7 @@ export default function CartPage() {
 
                   <button
                     onClick={() => removeItem(item.variantId)}
-                    className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                    className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-red-500 transition-colors"
                     aria-label="Remove item"
                   >
                     <Trash2 size={16} />

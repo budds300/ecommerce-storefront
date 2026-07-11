@@ -20,7 +20,7 @@ export default function WishlistPage() {
 
   if (!customer) {
     return (
-      <div style={{ maxWidth: 640, margin: '80px auto', textAlign: 'center', padding: '0 32px' }}>
+      <div className="px-4 sm:px-8" style={{ maxWidth: 640, margin: '80px auto', textAlign: 'center' }}>
         <svg width="64" height="64" fill="none" stroke="#cbd5e1" strokeWidth="1.5" viewBox="0 0 24 24" style={{ margin: '0 auto 24px' }}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>
         </svg>
@@ -41,7 +41,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto', padding: '40px 32px 80px' }}>
+    <div className="px-4 sm:px-8" style={{ maxWidth: 860, margin: '0 auto', paddingTop: 40, paddingBottom: 80 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}>
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1e293b', margin: 0 }}>
           Wishlist {count > 0 && <span style={{ color: '#64748b', fontWeight: 400, fontSize: 18 }}>({count})</span>}
@@ -92,6 +92,7 @@ export default function WishlistPage() {
             return (
               <div
                 key={item.id}
+                className="flex-wrap sm:flex-nowrap"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 16,
                   background: '#f8fafc', borderRadius: 12, padding: '16px 20px',
@@ -106,7 +107,7 @@ export default function WishlistPage() {
                 </Link>
 
                 {/* Info */}
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="basis-full sm:basis-0" style={{ flexGrow: 1, flexShrink: 1, minWidth: 0 }}>
                   <Link href={productHref} style={{ textDecoration: 'none' }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: '#1e293b', marginBottom: 2 }}>
                       {product?.title ?? 'Product'}
@@ -121,7 +122,7 @@ export default function WishlistPage() {
                 </div>
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                <div className="w-full sm:w-auto justify-end" style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                   <button
                     onClick={() => {
                       if (product) {
@@ -135,7 +136,7 @@ export default function WishlistPage() {
                       }
                     }}
                     style={{
-                      height: 36, padding: '0 16px', border: 0, borderRadius: 8,
+                      height: 40, padding: '0 16px', border: 0, borderRadius: 8,
                       background: '#3b82f6', color: '#fff', fontFamily: 'inherit',
                       fontWeight: 600, fontSize: 13, cursor: 'pointer',
                     }}
@@ -149,7 +150,7 @@ export default function WishlistPage() {
                       toast.success('Removed from wishlist');
                     }}
                     style={{
-                      height: 36, padding: '0 16px', border: '1px solid #e2e8f0',
+                      height: 40, padding: '0 16px', border: '1px solid #e2e8f0',
                       borderRadius: 8, background: '#fff', color: '#64748b',
                       fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
                       cursor: loading ? 'wait' : 'pointer',

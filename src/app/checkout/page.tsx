@@ -28,6 +28,42 @@ const checkoutSchema = z.object({
 
 type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
+const DRAFT_KEY = 'checkout_draft';
+const DRAFT_TTL = 60 * 60 * 1000; // 1 hour
+const DRAFT_FIELDS = [
+  'customerName', 'customerPhone', 'customerEmail', 'city',
+  'shippingAddress', 'shippingLandmark', 'shippingNotes', 'paymentMethod',
+] as const satisfies readonly (keyof CheckoutFormData)[];
+
+type CheckoutDraft = Partial<CheckoutFormData> & { deliveryType?: DeliveryType };
+
+function loadDraft(): CheckoutDraft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    const { ts, ...draft } = JSON.parse(raw) as CheckoutDraft & { ts: number };
+    if (Date.now() - ts > DRAFT_TTL) {
+      localStorage.removeItem(DRAFT_KEY);
+      return null;
+    }
+    return draft;
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(draft: CheckoutDraft): void {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...draft, ts: Date.now() }));
+  } catch {
+    // ignore quota errors
+  }
+}
+
+function clearDraft(): void {
+  localStorage.removeItem(DRAFT_KEY);
+}
+
 function toIntlPhone(phone: string): string {
   const p = phone.replace(/\s+/g, '');
   return p.startsWith('0') ? '254' + p.slice(1) : p;
@@ -112,9 +148,11 @@ export default function CheckoutPage() {
   const [mpesaCartId, setMpesaCartId] = useState<string | null>(null);
 
   const [emailVerified, setEmailVerified] = useState(false);
-  const [magicSent, setMagicSent] = useState(false);
-  const [magicSending, setMagicSending] = useState(false);
-  const [magicError, setMagicError] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpCode, setOtpCode] = useState('');
   const [countdown, setCountdown] = useState(0);
 
   const [allOptions, setAllOptions] = useState<ShippingOption[]>([]);
@@ -153,6 +191,28 @@ export default function CheckoutPage() {
     fetchCustomer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Restore an in-progress draft — covers returning in a new tab after clicking
+  // the email verification link, or the original tab reloading.
+  useEffect(() => {
+    const draft = loadDraft();
+    if (!draft) return;
+    for (const field of DRAFT_FIELDS) {
+      const value = draft[field];
+      if (value) setValue(field, value);
+    }
+    if (draft.deliveryType) setDeliveryType(draft.deliveryType);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist the draft as the user fills the form.
+  useEffect(() => {
+    const subscription = watch((values) => {
+      saveDraft({ ...values, deliveryType });
+    });
+    return () => subscription.unsubscribe();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watch, deliveryType]);
 
   useEffect(() => {
     async function loadOptions() {
@@ -199,37 +259,11 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (isAuthenticated) return;
     setEmailVerified(false);
-    setMagicSent(false);
-    setMagicError(null);
+    setOtpSent(false);
+    setOtpError(null);
+    setOtpCode('');
     setCountdown(0);
   }, [customerEmail, isAuthenticated]);
-
-  useEffect(() => {
-    function checkVerified() {
-      try {
-        const raw = localStorage.getItem('ml_verified');
-        if (!raw) return;
-        const { email, ts } = JSON.parse(raw) as { email: string; ts: number };
-        const FIVE_MIN = 5 * 60 * 1000;
-        if (Date.now() - ts > FIVE_MIN) {
-          localStorage.removeItem('ml_verified');
-          return;
-        }
-        if (email && !isAuthenticated) {
-          setValue('customerEmail', email);
-          setEmailVerified(true);
-          localStorage.removeItem('ml_verified');
-        }
-      } catch {
-        localStorage.removeItem('ml_verified');
-      }
-    }
-    checkVerified();
-    const onStorage = (e: StorageEvent) => { if (e.key === 'ml_verified') checkVerified(); };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -262,6 +296,7 @@ export default function CheckoutPage() {
           const result = await sdk.store.cart.complete(mpesaCartId);
           if (result.type === 'order' && result.order) {
             clearCart();
+            clearDraft();
             router.push(`/order-confirmation?order=${result.order.display_id}&method=mpesa`);
           }
           return;
@@ -275,26 +310,49 @@ export default function CheckoutPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mpesaCartId]);
 
-  async function handleSendMagicLink() {
-    setMagicSending(true);
-    setMagicError(null);
+  async function handleSendOtp() {
+    setOtpSending(true);
+    setOtpError(null);
     try {
-      const res = await fetch('/api/magic/send', {
+      const res = await fetch('/api/otp/send', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: customerEmail, context: 'checkout', redirectTo: '/checkout' }),
+        body: JSON.stringify({ email: customerEmail }),
       });
       const data = await res.json() as { success: boolean; message?: string };
       if (data.success) {
-        setMagicSent(true);
+        setOtpSent(true);
+        setOtpCode('');
         setCountdown(60);
       } else {
-        setMagicError(data.message ?? 'Failed to send link.');
+        setOtpError(data.message ?? 'Failed to send code.');
       }
     } catch {
-      setMagicError('Failed to send link. Try again.');
+      setOtpError('Failed to send code. Try again.');
     } finally {
-      setMagicSending(false);
+      setOtpSending(false);
+    }
+  }
+
+  async function handleVerifyOtp() {
+    setOtpVerifying(true);
+    setOtpError(null);
+    try {
+      const res = await fetch('/api/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: customerEmail, otp: otpCode }),
+      });
+      const data = await res.json() as { success: boolean; verified?: boolean; message?: string };
+      if (data.success && data.verified) {
+        setEmailVerified(true);
+      } else {
+        setOtpError(data.message ?? 'Invalid or expired code.');
+      }
+    } catch {
+      setOtpError('Verification failed. Try again.');
+    } finally {
+      setOtpVerifying(false);
     }
   }
 
@@ -422,6 +480,7 @@ export default function CheckoutPage() {
 
       if (result.type === 'order' && result.order) {
         clearCart();
+        clearDraft();
         router.push(
           `/order-confirmation?order=${result.order.display_id}&method=${data.paymentMethod}`
         );
@@ -438,18 +497,18 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 32px 80px' }}>
+    <div className="px-4 sm:px-8" style={{ maxWidth: 1180, margin: '0 auto', paddingTop: 24, paddingBottom: 80 }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1e293b', marginBottom: 32, letterSpacing: '-0.01em' }}>
         Checkout
       </h1>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px]" style={{ gap: 24, alignItems: 'start' }}>
         {/* ── Left: step cards ── */}
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Step 1 — Contact */}
           <StepCard n={1} title="Contact Details">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 12 }}>
               <Field label="Full Name" error={errors.customerName?.message}>
                 <input {...register('customerName')} style={inputStyle} placeholder="Jane Mwangi" />
               </Field>
@@ -474,31 +533,31 @@ export default function CheckoutPage() {
               <input {...register('customerPhone')} style={inputStyle} placeholder="0712345678" />
             </Field>
 
-            {/* Magic link verification */}
+            {/* OTP verification */}
             {paymentMethod === 'cod' && !emailVerified && !isAuthenticated && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {!magicSent ? (
+                {!otpSent ? (
                   <>
                     <button
                       type="button"
-                      disabled={magicSending || !customerEmail}
-                      onClick={handleSendMagicLink}
+                      disabled={otpSending || !customerEmail}
+                      onClick={handleSendOtp}
                       style={{
                         height: 40, border: '1px solid #1e293b', borderRadius: 8, background: '#fff',
                         color: '#1e293b', fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
-                        cursor: magicSending || !customerEmail ? 'not-allowed' : 'pointer',
-                        opacity: magicSending || !customerEmail ? 0.5 : 1,
+                        cursor: otpSending || !customerEmail ? 'not-allowed' : 'pointer',
+                        opacity: otpSending || !customerEmail ? 0.5 : 1,
                       }}
                     >
-                      {magicSending ? 'Sending…' : 'Send Verification Link'}
+                      {otpSending ? 'Sending…' : 'Send Verification Code'}
                     </button>
-                    {magicError && <span style={{ fontSize: 11, color: '#ef4444' }}>{magicError}</span>}
+                    {otpError && <span style={{ fontSize: 11, color: '#ef4444' }}>{otpError}</span>}
                     <span style={{ fontSize: 11, color: '#94a3b8' }}>
-                      We&apos;ll send a one-click verification link to your email
+                      We&apos;ll email you a 6-digit code to confirm your address
                     </span>
                   </>
                 ) : (
-                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg style={{ width: 20, height: 20, color: '#3b82f6', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -506,13 +565,37 @@ export default function CheckoutPage() {
                       <span style={{ fontSize: 14, fontWeight: 600, color: '#1e40af' }}>Check your inbox</span>
                     </div>
                     <p style={{ fontSize: 12, color: '#1d4ed8', margin: 0, paddingLeft: 28 }}>
-                      We sent a verification link to <strong>{customerEmail}</strong>. Click it to confirm your email.
+                      We sent a 6-digit code to <strong>{customerEmail}</strong>. Enter it below to confirm your email.
                     </p>
+                    <div style={{ display: 'flex', gap: 8, paddingLeft: 28 }}>
+                      <input
+                        value={otpCode}
+                        onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="123456"
+                        style={{ ...inputStyle, width: 120, letterSpacing: '0.15em', textAlign: 'center' }}
+                      />
+                      <button
+                        type="button"
+                        disabled={otpVerifying || otpCode.length !== 6}
+                        onClick={handleVerifyOtp}
+                        style={{
+                          height: 40, padding: '0 16px', border: 0, borderRadius: 8, background: '#1e293b',
+                          color: '#fff', fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
+                          cursor: otpVerifying || otpCode.length !== 6 ? 'not-allowed' : 'pointer',
+                          opacity: otpVerifying || otpCode.length !== 6 ? 0.5 : 1,
+                        }}
+                      >
+                        {otpVerifying ? 'Verifying…' : 'Verify'}
+                      </button>
+                    </div>
+                    {otpError && <span style={{ fontSize: 11, color: '#ef4444', paddingLeft: 28 }}>{otpError}</span>}
                     <div style={{ paddingLeft: 28 }}>
                       <button
                         type="button"
-                        disabled={magicSending || countdown > 0}
-                        onClick={handleSendMagicLink}
+                        disabled={otpSending || countdown > 0}
+                        onClick={handleSendOtp}
                         style={{ fontSize: 12, color: '#3b82f6', background: 'none', border: 0, cursor: countdown > 0 ? 'not-allowed' : 'pointer', textDecoration: 'underline', opacity: countdown > 0 ? 0.5 : 1 }}
                       >
                         {countdown > 0 ? `Resend in ${countdown}s` : "Didn't receive it? Resend"}
@@ -535,7 +618,7 @@ export default function CheckoutPage() {
 
           {/* Step 2 — Delivery */}
           <StepCard n={2} title="Delivery Method">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 12 }}>
               {([
                 ['delivery', 'Home Delivery', 'Delivered to your doorstep', <HomeIcon key="home" />] as const,
                 ['pickup', 'Pickup Station', 'Collect from a nearby point', <PinIcon key="pin" />] as const,
@@ -605,7 +688,7 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2" style={{ gap: 12 }}>
                   <Field label="City / Town" error={errors.city?.message}>
                     <input {...register('city')} style={inputStyle} placeholder="Nairobi" />
                   </Field>
@@ -742,7 +825,7 @@ export default function CheckoutPage() {
         </form>
 
         {/* ── Right: order summary ── */}
-        <aside style={{ position: 'sticky', top: 80, background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 22 }}>
+        <aside className="lg:sticky lg:top-20" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 22 }}>
           <div style={{ fontSize: 16, fontWeight: 700, color: '#1e293b', marginBottom: 16 }}>Your order</div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingBottom: 16, borderBottom: '1px solid #e2e8f0' }}>

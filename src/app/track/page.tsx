@@ -3,9 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import type { HttpTypes } from '@medusajs/types';
-import { sdk } from '@/lib/sdk';
+import { API_BASE_URL } from '@/lib/constants';
 import { formatKES, formatDate } from '@/lib/utils';
+import { useCustomer } from '@/store/customer';
 
 const STATUS_STEPS = ['pending', 'confirmed', 'shipped', 'delivered'] as const;
 type ProgressStep = (typeof STATUS_STEPS)[number];
@@ -17,7 +17,28 @@ const STATUS_STEP_LABELS: Record<ProgressStep, string> = {
   delivered: 'Delivered',
 };
 
-function deriveProgressStep(order: HttpTypes.StoreOrder): ProgressStep | 'cancelled' {
+interface TrackedOrderItem {
+  id: string;
+  title: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+}
+
+interface TrackedOrder {
+  id: string;
+  display_id: number;
+  status: string;
+  fulfillment_status: string;
+  payment_status: string;
+  email: string;
+  total: number;
+  currency_code: string;
+  created_at: string;
+  items: TrackedOrderItem[];
+}
+
+function deriveProgressStep(order: TrackedOrder): ProgressStep | 'cancelled' {
   if (order.status === 'canceled') return 'cancelled';
   if (order.fulfillment_status === 'delivered') return 'delivered';
   if (
@@ -31,9 +52,10 @@ function deriveProgressStep(order: HttpTypes.StoreOrder): ProgressStep | 'cancel
 
 function TrackOrderContent() {
   const searchParams = useSearchParams();
+  const { customer } = useCustomer();
   const [displayId, setDisplayId] = useState(searchParams.get('order') ?? '');
-  const [email, setEmail] = useState('');
-  const [result, setResult] = useState<HttpTypes.StoreOrder | null>(null);
+  const [email, setEmail] = useState(customer?.email ?? '');
+  const [result, setResult] = useState<TrackedOrder | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -41,6 +63,10 @@ function TrackOrderContent() {
     const prefilled = searchParams.get('order');
     if (prefilled) setDisplayId(prefilled);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (customer?.email) setEmail(customer.email);
+  }, [customer?.email]);
 
   const handleTrack = async () => {
     if (!displayId.trim() || !email.trim()) {
@@ -53,20 +79,26 @@ function TrackOrderContent() {
     setResult(null);
 
     try {
-      const { orders } = await sdk.store.order.list({
-        display_id: parseInt(displayId.trim(), 10),
-        fields: 'id,display_id,status,fulfillment_status,payment_status,email,total,currency_code,created_at,*items',
-      } as Record<string, unknown>);
+      const params = new URLSearchParams({
+        display_id: displayId.trim(),
+        email: email.trim(),
+      });
+      const res = await fetch(`${API_BASE_URL}/store/orders/track?${params.toString()}`, {
+        headers: {
+          'x-publishable-api-key': process.env['NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY'] ?? '',
+        },
+      });
 
-      const order = orders.find(
-        (o) => o.email?.toLowerCase() === email.trim().toLowerCase()
-      );
-
-      if (!order) {
+      if (res.status === 404) {
         setError('Order not found. Please check your order number and email address.');
         return;
       }
+      if (!res.ok) {
+        setError('Something went wrong. Please try again.');
+        return;
+      }
 
+      const { order } = (await res.json()) as { order: TrackedOrder };
       setResult(order);
     } catch {
       setError('Something went wrong. Please try again.');
@@ -107,7 +139,11 @@ function TrackOrderContent() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
-            className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            readOnly={!!customer?.email}
+            disabled={!!customer?.email}
+            className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 ${
+              customer?.email ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
+            }`}
             placeholder="jane@example.com"
           />
         </div>
@@ -128,7 +164,7 @@ function TrackOrderContent() {
           <div className="flex justify-between items-start mb-6">
             <div>
               <p className="font-bold text-gray-900">Order #{result.display_id}</p>
-              <p className="text-xs text-gray-500 mt-1">{formatDate(result.created_at!)}</p>
+              <p className="text-xs text-gray-500 mt-1">{formatDate(result.created_at)}</p>
             </div>
             <span
               className={`text-xs px-2.5 py-1 rounded-full font-medium capitalize ${

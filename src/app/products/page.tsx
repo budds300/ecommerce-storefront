@@ -3,6 +3,7 @@ import { getRegionId } from '@/lib/region';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import Link from 'next/link';
 import { ProductSearch } from './ProductSearch';
+import { CategoryFilterDrawer } from '@/components/shared/CategoryFilterDrawer';
 
 interface PageProps {
   searchParams: Promise<{ category?: string; search?: string; page?: string; collection_id?: string }>;
@@ -45,12 +46,12 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   const totalPages = Math.ceil((count ?? 0) / 20);
 
   return (
-    <div style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 32px 80px' }}>
-      <div style={{ display: 'flex', gap: 24, alignItems: 'start' }}>
+    <div className="max-w-[1280px] mx-auto px-4 sm:px-8 pt-6 sm:pt-8 pb-20">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-6 items-start">
 
-        {/* Sidebar */}
+        {/* Sidebar — desktop only; mobile uses the CategoryFilterDrawer instead */}
         {categories.length > 0 && (
-          <aside style={{ width: 240, flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <aside className="hidden lg:flex w-full lg:w-[240px] lg:flex-shrink-0 flex-col gap-4">
             <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: 12, padding: 12 }}>
               <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.14em', color: '#64748b', textTransform: 'uppercase', padding: '6px 10px 10px' }}>
                 Categories
@@ -98,19 +99,28 @@ export default async function ProductsPage({ searchParams }: PageProps) {
             <ProductSearch defaultValue={params.search ?? ''} />
           </div>
 
-          {/* Count + title */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          {/* Count + mobile category filter */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
             <p style={{ fontSize: 13, color: '#64748b', margin: 0 }}>
               {count ?? 0} {(count ?? 0) === 1 ? 'product' : 'products'}
               {params.search && <span> for &ldquo;{params.search}&rdquo;</span>}
             </p>
+            {categories.length > 0 && (
+              <div>
+                <CategoryFilterDrawer
+                  categories={categories}
+                  activeCategoryId={params.category}
+                  activeCategoryName={categories.find((c) => c.id === params.category)?.name}
+                />
+              </div>
+            )}
           </div>
 
           <ProductGrid products={products} />
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 40 }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap' }}>
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
                 <Link
                   key={p}

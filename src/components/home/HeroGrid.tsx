@@ -195,9 +195,9 @@ export function HeroGrid({ collections, collectionProducts }: HeroGridProps) {
   }, [slides.length]);
 
   return (
-    <section style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
+    <section className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-4">
       {/* Main slider */}
-      <div style={{ background: '#f8fafc', borderRadius: 12, position: 'relative', minHeight: 420, overflow: 'hidden' }}>
+      <div className="min-h-[320px] sm:min-h-[420px]" style={{ background: '#f8fafc', borderRadius: 12, position: 'relative', overflow: 'hidden' }}>
         <div style={{
           display: 'flex',
           height: '100%',
@@ -208,12 +208,9 @@ export function HeroGrid({ collections, collectionProducts }: HeroGridProps) {
           {slides.map((slide, k) => (
             <div
               key={k}
+              className="flex flex-col sm:flex-row items-center gap-6 p-6 sm:p-12 min-h-[320px] sm:min-h-[420px]"
               style={{
                 width: `${100 / slides.length}%`,
-                minHeight: 420,
-                padding: 48,
-                display: 'flex',
-                alignItems: 'center',
                 boxSizing: 'border-box',
               }}
             >
@@ -221,7 +218,7 @@ export function HeroGrid({ collections, collectionProducts }: HeroGridProps) {
                 <div style={{ fontSize: 12, fontWeight: 500, letterSpacing: '0.14em', color: '#64748b', marginBottom: 16 }}>
                   {slide.eyebrow}
                 </div>
-                <h1 style={{ fontSize: 48, fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.05, margin: 0, color: '#1e293b' }}>
+                <h1 className="text-3xl sm:text-5xl" style={{ fontWeight: 700, letterSpacing: '-0.02em', lineHeight: 1.05, margin: 0, color: '#1e293b' }}>
                   {slide.title}
                 </h1>
                 <p style={{ fontSize: 14, color: '#475569', lineHeight: 1.6, marginTop: 18, marginBottom: 28 }}>
@@ -243,7 +240,7 @@ export function HeroGrid({ collections, collectionProducts }: HeroGridProps) {
         </div>
 
         {/* Pager dots */}
-        <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 2 }}>
+        <div style={{ position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 2 }}>
           {slides.map((_, k) => (
             <button
               key={k}
@@ -260,7 +257,7 @@ export function HeroGrid({ collections, collectionProducts }: HeroGridProps) {
       </div>
 
       {/* Promo cards */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="flex flex-col sm:flex-row lg:flex-col gap-4">
         {collections && collections.length >= 2 ? (
           collections.slice(0, 2).map((col, i) => (
             <PromoCard

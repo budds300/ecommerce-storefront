@@ -1,12 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useCart } from '@/store/cart';
 import { useCustomer } from '@/store/customer';
 import { useWishlist } from '@/store/wishlist';
 import { useEffect, useRef, useState } from 'react';
+import { MobileNav } from './MobileNav';
 
 export function Header() {
+  const pathname = usePathname();
+  const hideSearch = pathname === '/products';
   const totalItems = useCart((s) => s.totalItems);
   const wishlistCount = useWishlist((s) => s.count);
   const { fetchWishlist } = useWishlist();
@@ -33,18 +37,20 @@ export function Header() {
 
   return (
     <header style={{
-      position: 'sticky', top: 0, zIndex: 50, height: 64,
+      position: 'sticky', top: 0, zIndex: 50,
       background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)',
       borderBottom: '1px solid #e2e8f0',
     }}>
-      <div style={{
-        maxWidth: 1280, margin: '0 auto', height: '100%',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', gap: 24,
-      }}>
-        {/* Left Section: Logo & Nav */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 sm:h-16 sm:flex-nowrap sm:gap-6 sm:px-8 sm:py-0"
+        style={{ maxWidth: 1600, margin: '0 auto' }}
+      >
+        {/* Left Section: Menu & Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-          {/* Logo */}
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <MobileNav />
+            {/* Logo */}
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
             <span style={{
               width: 32, height: 32, background: '#3b82f6', borderRadius: 8,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
@@ -56,15 +62,13 @@ export function Header() {
             <span style={{ fontWeight: 700, fontSize: 17, letterSpacing: '-0.01em', color: '#1e293b', whiteSpace: 'nowrap' }}>
               Soft Solutions Store
             </span>
-          </Link>
-
-          
+            </Link>
+          </div>
         </div>
 
-        {/* Right Section: Search & Utility */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, justifyContent: 'flex-end' }}>
-          {/* Search */}
-          <form 
+        {/* Search — wraps to its own full-width row on mobile; hidden on /products, which has its own search */}
+        {!hideSearch && (
+          <form
             onSubmit={(e) => {
               e.preventDefault();
               const search = new FormData(e.currentTarget).get('search')?.toString();
@@ -74,7 +78,8 @@ export function Header() {
                 window.location.href = '/products';
               }
             }}
-            style={{ flex: '0 1 360px', width: '100%', position: 'relative' }}
+            className="order-3 w-full sm:order-none sm:flex-[0_1_360px]"
+            style={{ position: 'relative' }}
           >
             <svg style={{ position: 'absolute', left: 12, top: 11, width: 18, height: 18, color: '#94a3b8', pointerEvents: 'none' }}
               viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -90,14 +95,16 @@ export function Header() {
               }}
             />
           </form>
+        )}
 
-          {/* Utility icons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 2, color: '#1e293b', flexShrink: 0 }}>
-            {/* Account */}
+        {/* Right Section: Utility icons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 2, color: '#1e293b', flexShrink: 0 }}>
+            {/* Account — moved into the mobile drawer below sm */}
             <Link
               href={customer ? '/account' : '/account/login'}
               title={customer ? `${customer.first_name} ${customer.last_name}` : 'Sign in'}
-              style={iconBtnStyle}
+              className="hidden sm:inline-flex"
+              style={{ ...iconBtnStyle, display: undefined }}
               aria-label="Account"
             >
               {customer ? (
@@ -111,8 +118,8 @@ export function Header() {
               )}
             </Link>
 
-            {/* Wishlist */}
-            <Link href="/wishlist" style={{ ...iconBtnStyle, position: 'relative' } as React.CSSProperties} aria-label="Wishlist">
+            {/* Wishlist — moved into the mobile drawer below sm */}
+            <Link href="/wishlist" className="hidden sm:inline-flex" style={{ ...iconBtnStyle, display: undefined, position: 'relative' } as React.CSSProperties} aria-label="Wishlist">
               <svg width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>
               </svg>
@@ -149,7 +156,6 @@ export function Header() {
               )}
             </Link>
           </div>
-        </div>
       </div>
     </header>
   );

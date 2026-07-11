@@ -2,10 +2,11 @@ import Link from 'next/link';
 import type { HttpTypes } from '@medusajs/types';
 import { sdk } from '@/lib/sdk';
 import { getRegionId } from '@/lib/region';
-import { ProductCard } from '@/components/product/ProductCard';
+import { ProductGrid } from '@/components/product/ProductGrid';
 import { HeroGrid } from '@/components/home/HeroGrid';
 import { TrustBar } from '@/components/home/TrustBar';
 import { CategoryTiles } from '@/components/home/CategoryTiles';
+import { CategoryFilterDrawer } from '@/components/shared/CategoryFilterDrawer';
 
 export const revalidate = 60;
 
@@ -72,29 +73,44 @@ export default async function HomePage() {
   }
 
   return (
-    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 32px 80px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
+    <main className="px-4 sm:px-8" style={{ maxWidth: 1600, margin: '0 auto', paddingTop: 24, paddingBottom: 80 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
         <HeroGrid collections={collections} collectionProducts={collectionProducts} />
         <TrustBar />
-        <CategoryTiles categories={categories} categoryProducts={categoryProducts} />
 
-        {products.length > 0 && (
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.01em', margin: 0, color: '#1e293b' }}>
-                Featured Products
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+          {/* Categories — sidebar on desktop; mobile uses the CategoryFilterDrawer instead */}
+          {categories.length > 0 && (
+            <aside className="hidden lg:block lg:w-[260px] lg:flex-shrink-0">
+              <h2 style={{ fontSize: 18, fontWeight: 700, letterSpacing: '-0.01em', margin: '0 0 16px', color: '#1e293b' }}>
+                Categories
               </h2>
-              <Link href="/products" style={{ fontSize: 13, color: '#1e293b', textDecoration: 'underline' }}>
-                View all
-              </Link>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </section>
-        )}
+              <CategoryTiles categories={categories} categoryProducts={categoryProducts} />
+            </aside>
+          )}
+
+          {/* Featured Products */}
+          {products.length > 0 && (
+            <section style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, gap: 12 }}>
+                <h2 style={{ fontSize: 24, fontWeight: 700, letterSpacing: '-0.01em', margin: 0, color: '#1e293b' }}>
+                  Featured Products
+                </h2>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {categories.length > 0 && (
+                    <div className="lg:hidden">
+                      <CategoryFilterDrawer categories={categories} />
+                    </div>
+                  )}
+                  <Link href="/products" style={{ fontSize: 13, color: '#1e293b', textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+                    View all
+                  </Link>
+                </div>
+              </div>
+              <ProductGrid products={products} />
+            </section>
+          )}
+        </div>
       </div>
     </main>
   );

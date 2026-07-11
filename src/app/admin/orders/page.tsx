@@ -86,8 +86,8 @@ export default function AdminOrdersPage() {
       ) : orders.length === 0 ? (
         <div className="text-center py-12 text-gray-500 text-sm">No orders found.</div>
       ) : (
-        <div className="bg-white rounded-lg border overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-lg border overflow-x-auto">
+          <table className="w-full text-sm min-w-[720px]">
             <thead>
               <tr className="border-b bg-gray-50">
                 <th className="text-left px-4 py-3 font-medium">Order</th>

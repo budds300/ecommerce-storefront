@@ -17,6 +17,10 @@ export async function POST(req: Request) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     saveOtp(email, code);
 
+    if (process.env['NODE_ENV'] !== 'production') {
+      console.log(`[dev] OTP for ${email}: ${code}`);
+    }
+
     await sendOtpEmail(email, code);
     console.log(`OTP sent to ${email}`);
 

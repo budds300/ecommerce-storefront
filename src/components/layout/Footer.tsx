@@ -2,18 +2,18 @@ import Link from 'next/link';
 
 const COLS = [
   { title: 'Shop', items: [{ label: 'All Products', href: '/products' }, { label: 'Deals', href: '/products' }, { label: 'New Arrivals', href: '/products' }] },
-  { title: 'Support', items: [{ label: 'Track Order', href: '/track' }, { label: 'Returns', href: '#' }, { label: 'Contact Us', href: '#' }] },
+  { title: 'Support', items: [{ label: 'Track Order', href: '/track' }, { label: 'Returns', href: '/returns' }, { label: 'Contact Us', href: '/contact' }] },
   { title: 'Account', items: [{ label: 'My Account', href: '/account' }, { label: 'Sign In', href: '/account/login' }, { label: 'Register', href: '/account/register' }] },
-  { title: 'Legal', items: [{ label: 'Privacy', href: '#' }, { label: 'Terms', href: '#' }, { label: 'Accessibility', href: '#' }] },
+  { title: 'Legal', items: [{ label: 'Privacy', href: '/privacy' }, { label: 'Terms', href: '/terms' }, { label: 'Accessibility', href: '/accessibility' }] },
 ];
 
 export function Footer() {
   return (
-    <footer style={{ background: '#1e293b', color: '#cbd5e1', padding: '64px 32px 32px' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr', gap: 32, marginBottom: 48 }}>
+    <footer className="px-4 sm:px-8" style={{ background: '#1e293b', color: '#cbd5e1', paddingTop: 48, paddingBottom: 32 }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto' }}>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-x-6 gap-y-10 sm:gap-8 mb-10 sm:mb-12">
           {/* Brand column */}
-          <div>
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
               <span style={{ width: 32, height: 32, background: '#3b82f6', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" stroke="#fff" strokeWidth="2" fill="none" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
@@ -59,7 +59,10 @@ export function Footer() {
           ))}
         </div>
 
-        <div style={{ borderTop: '1px solid #334155', paddingTop: 24, display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#64748b', flexWrap: 'wrap', gap: 8 }}>
+        <div
+          className="flex flex-col sm:flex-row items-center sm:items-center sm:justify-between text-center sm:text-left"
+          style={{ borderTop: '1px solid #334155', paddingTop: 24, fontSize: 12, color: '#64748b', gap: 8 }}
+        >
           <span>© {new Date().getFullYear()} Soft Solutions Store. All rights reserved.</span>
           <span>Secure checkout · M-Pesa accepted</span>
         </div>

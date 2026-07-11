@@ -35,13 +35,13 @@ export function ProductCard({ product }: ProductCardProps) {
         background: hov ? '#ffffff' : '#f8fafc',
         border: hov ? '1px solid #e2e8f0' : '1px solid transparent',
         borderRadius: 12,
-        padding: 20,
+        padding: '16px 12px',
         position: 'relative',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: 10,
+        gap: 12,
         transform: hov ? 'translateY(-6px)' : 'translateY(0)',
         boxShadow: hov ? '0 18px 36px rgba(15,23,42,0.12), 0 2px 6px rgba(15,23,42,0.04)' : 'none',
         transition: 'background 200ms cubic-bezier(0.4,0,0.2,1), border-color 200ms, transform 280ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 280ms',
@@ -96,15 +96,15 @@ export function ProductCard({ product }: ProductCardProps) {
           }
         }}
         style={{
-          position: 'absolute', top: 12, right: 12, width: 32, height: 32, border: 0,
+          position: 'absolute', top: 4, right: 4, width: 44, height: 44, border: 0,
           borderRadius: 9999,
-          background: hov ? '#fff' : 'transparent',
-          boxShadow: hov ? '0 4px 12px rgba(15,23,42,0.10)' : 'none',
+          background: '#fff',
+          boxShadow: hov ? '0 4px 12px rgba(15,23,42,0.18)' : '0 2px 6px rgba(15,23,42,0.12)',
           cursor: wishlistLoading ? 'wait' : 'pointer', zIndex: 2,
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
           color: wished ? '#ef4444' : hov ? '#3b82f6' : '#94a3b8',
           transform: wished ? 'scale(1.15)' : hov ? 'scale(1.05)' : 'scale(1)',
-          transition: 'color 200ms, background 200ms, box-shadow 200ms, transform 220ms cubic-bezier(0.34,1.56,0.64,1)',
+          transition: 'color 200ms, box-shadow 200ms, transform 220ms cubic-bezier(0.34,1.56,0.64,1)',
           opacity: wishlistLoading ? 0.6 : 1,
         }}
       >
@@ -116,24 +116,22 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product image */}
       <Link href={`/products/${product.id}`} style={{ width: '100%', textDecoration: 'none', position: 'relative', zIndex: 1 }}>
         <div style={{
-          height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%',
-          transform: hov ? 'scale(1.08) translateY(-4px)' : 'scale(1) translateY(0)',
+          position: 'relative', width: '88%', margin: '0 auto', aspectRatio: '1 / 1', borderRadius: 8, overflow: 'hidden',
+          transform: hov ? 'scale(1.05)' : 'scale(1)',
           transition: 'transform 420ms cubic-bezier(0.34,1.56,0.64,1)',
-          filter: hov ? 'drop-shadow(0 12px 16px rgba(15,23,42,0.18))' : 'drop-shadow(0 0 0 rgba(0,0,0,0))',
+          boxShadow: hov ? '0 12px 16px rgba(15,23,42,0.18)' : 'none',
         }}>
-          <div style={{ position: 'relative', width: 128, height: 128 }}>
-            <Image
-              src={image}
-              alt={product.title ?? ''}
-              fill
-              className="object-contain"
-              sizes="128px"
-            />
-          </div>
+          <Image
+            src={image}
+            alt={product.title ?? ''}
+            fill
+            className="object-cover"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 240px"
+          />
           {!inStock && (
             <div style={{
               position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <span style={{ color: '#fff', fontWeight: 600, fontSize: 13 }}>Out of Stock</span>
             </div>
@@ -172,16 +170,18 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
       )}
 
-      {/* Reveal button — slides up on hover */}
-      <div style={{
-        width: '100%',
-        maxHeight: hov ? 44 : 0,
-        marginTop: hov ? 8 : 0,
-        opacity: hov ? 1 : 0,
-        overflow: 'hidden',
-        transition: 'max-height 280ms cubic-bezier(0.4,0,0.2,1), margin-top 280ms, opacity 220ms 80ms',
-        position: 'relative', zIndex: 1,
-      }}>
+      {/* Always visible on touch devices; slides up on hover only where real hover exists */}
+      <div
+        className="cart-reveal"
+        data-hov={hov}
+        style={{
+          width: '100%',
+          marginTop: 10,
+          opacity: 1,
+          overflow: 'hidden',
+          position: 'relative', zIndex: 1,
+        }}
+      >
         <AddToCartButton
           disabled={!inStock}
           label={!inStock ? 'Out of Stock' : isBackorder ? 'Pre-order' : 'Add to Cart'}
@@ -211,7 +211,7 @@ function AddToCartButton({ disabled, label, onClick }: {
       onClick={onClick}
       disabled={disabled}
       style={{
-        width: '100%', height: 36, border: 0, borderRadius: 8,
+        width: '100%', height: 44, border: 0, borderRadius: 10, padding: '0 16px',
         background: disabled ? '#94a3b8' : bHov ? '#1e293b' : '#3b82f6',
         color: '#fff', fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
         letterSpacing: '0.02em', cursor: disabled ? 'not-allowed' : 'pointer',

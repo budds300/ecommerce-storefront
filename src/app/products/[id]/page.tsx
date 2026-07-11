@@ -62,7 +62,7 @@ export default function ProductDetailPage() {
   };
 
   return (
-    <div style={{ maxWidth: 1180, margin: '0 auto', padding: '32px 32px 80px' }}>
+    <div className="px-4 sm:px-8" style={{ maxWidth: 1180, margin: '0 auto', paddingTop: 24, paddingBottom: 80 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 64 }}>
 
         {/* Breadcrumbs */}
@@ -79,10 +79,13 @@ export default function ProductDetailPage() {
         </nav>
 
         {/* Top section: gallery + info */}
-        <section style={{
-          background: '#f8fafc', borderRadius: 12, padding: 32,
-          display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 48, alignItems: 'start',
-        }}>
+        <section
+          className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] p-5 sm:p-8"
+          style={{
+            background: '#f8fafc', borderRadius: 12,
+            gap: 32, alignItems: 'start',
+          }}
+        >
           {/* Gallery */}
           <div>
             <div style={{ height: 360, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -156,18 +159,18 @@ export default function ProductDetailPage() {
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     style={{
-                      width: 36, height: 36, border: 0, background: '#fff', cursor: 'pointer',
+                      width: 44, height: 44, border: 0, background: '#fff', cursor: 'pointer',
                       fontSize: 18, color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
                   >−</button>
                   <span style={{
-                    width: 44, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 14, fontWeight: 600, color: '#1e293b', borderLeft: '1px solid #e2e8f0', borderRight: '1px solid #e2e8f0',
                   }}>{quantity}</span>
                   <button
                     onClick={() => setQuantity(Math.min(maxQty, quantity + 1))}
                     style={{
-                      width: 36, height: 36, border: 0, background: '#fff', cursor: 'pointer',
+                      width: 44, height: 44, border: 0, background: '#fff', cursor: 'pointer',
                       fontSize: 18, color: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
                   >+</button>
@@ -176,15 +179,17 @@ export default function ProductDetailPage() {
             )}
 
             {/* Add to Cart */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginTop: 24 }}>
             <button
               onClick={handleAddToCart}
               disabled={!inStock}
+              className="w-full sm:w-auto"
               style={{
-                marginTop: 24, height: 44, padding: '0 28px', border: 0, borderRadius: 9999,
+                height: 48, padding: '0 28px', border: 0, borderRadius: 9999,
                 background: !inStock ? '#94a3b8' : '#1e293b',
                 color: '#fff', fontFamily: 'inherit', fontWeight: 600, fontSize: 14,
                 cursor: !inStock ? 'not-allowed' : 'pointer',
-                display: 'inline-flex', alignItems: 'center', gap: 8,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 boxShadow: inStock ? '0 6px 14px rgba(30,41,59,0.20)' : 'none',
                 transition: 'transform 150ms, box-shadow 150ms',
               }}
@@ -204,8 +209,9 @@ export default function ProductDetailPage() {
 
             <Link
               href="/checkout"
+              className="w-full sm:w-auto"
               style={{
-                display: 'inline-flex', alignItems: 'center', marginLeft: 12, height: 44, padding: '0 20px',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', height: 48, padding: '0 20px',
                 border: '1px solid #e2e8f0', borderRadius: 9999, fontSize: 14, fontWeight: 500,
                 color: '#1e293b', textDecoration: 'none', background: '#fff',
                 transition: 'background 150ms',
@@ -215,6 +221,7 @@ export default function ProductDetailPage() {
             >
               View Cart
             </Link>
+            </div>
 
             {product.handle && (
               <div style={{ marginTop: 28, fontSize: 13, color: '#64748b' }}>

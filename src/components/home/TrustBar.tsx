@@ -34,16 +34,16 @@ const ITEMS = [
 
 export function TrustBar() {
   return (
-    <section style={{
-      background: '#f8fafc', borderRadius: 12, padding: 18,
-      display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', alignItems: 'center',
-    }}>
+    <section
+      className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-0"
+      style={{ background: '#f8fafc', borderRadius: 12, padding: 18, alignItems: 'center' }}
+    >
       {ITEMS.map((item, i) => (
-        <div key={item.title} style={{
-          display: 'flex', alignItems: 'center', gap: 14,
-          padding: '6px 22px',
-          borderRight: i < ITEMS.length - 1 ? '1px solid #e2e8f0' : 'none',
-        }}>
+        <div
+          key={item.title}
+          className={i < ITEMS.length - 1 ? 'border-b sm:border-b-0 sm:border-r border-[#e2e8f0]' : ''}
+          style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '6px 22px' }}
+        >
           <span style={{ color: '#1e293b', flexShrink: 0 }}>{item.icon}</span>
           <div>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#1e293b', lineHeight: 1.2 }}>{item.title}</div>
