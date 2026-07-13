@@ -22,9 +22,12 @@ function getTransport(): Transporter {
     pool: true,
     maxConnections: 3,
     maxMessages: 100,
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
+    // Truehost's handshake is inconsistently slow (observed anywhere from ~10s
+    // to 45s+) rather than actually unreachable, so timeouts need real headroom
+    // — too tight and a merely-slow connection gets killed as if it were dead.
+    connectionTimeout: 45_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 45_000,
   });
 
   console.log(`[mailer] transport created in ${Date.now() - setupStart}ms (pooled, port ${port})`);
@@ -37,15 +40,18 @@ export interface SendEmailOptions {
   to: string;
   subject: string;
   html: string;
+  text?: string;
+  from?: string;
+  replyTo?: string;
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<void> {
-  const from = process.env['EMAIL_FROM'] ?? process.env['SMTP_USER'] ?? 'noreply@softsolutions.co.ke';
+export async function sendEmail({ to, subject, html, text, from: fromOverride, replyTo }: SendEmailOptions): Promise<void> {
+  const from = fromOverride ?? process.env['EMAIL_FROM'] ?? process.env['SMTP_USER'] ?? 'noreply@softsolutions.co.ke';
   const transport = getTransport();
 
   const sendStart = Date.now();
   try {
-    const info = await transport.sendMail({ from, to, subject, html });
+    const info = await transport.sendMail({ from, to, subject, html, text, replyTo });
     console.log(`[mailer] sendMail to ${to} took ${Date.now() - sendStart}ms (messageId: ${info.messageId})`);
   } catch (err) {
     console.error(`[mailer] sendMail to ${to} failed after ${Date.now() - sendStart}ms:`, err instanceof Error ? err.message : err);

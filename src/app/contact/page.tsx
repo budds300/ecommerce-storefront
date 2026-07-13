@@ -9,16 +9,27 @@ export default function ContactPage() {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
-    setTimeout(() => {
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, message }),
+      });
+      const data = await res.json() as { success: boolean; message?: string };
+      if (!data.success) throw new Error(data.message ?? 'Failed to send message.');
+
       toast.success("Message sent — we'll get back to you within 24 hours.");
       setName('');
       setEmail('');
       setMessage('');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
+    } finally {
       setSubmitting(false);
-    }, 600);
+    }
   };
 
   return (
@@ -75,13 +86,17 @@ export default function ContactPage() {
         <div className="space-y-6">
           <div className="border rounded-lg p-5">
             <p className="font-semibold text-sm mb-1">Customer Support</p>
-            <p className="text-sm text-gray-600">support@softsolutionsstore.co.ke</p>
-            <p className="text-sm text-gray-600">+254 700 000 000</p>
+            <p className="text-sm text-gray-600">
+              <a href="mailto:store.support@softsolutions.co.ke" className="underline hover:text-gray-900">
+                store.support@softsolutions.co.ke
+              </a>
+            </p>
+            <p className="text-sm text-gray-600">+254 741 842 133</p>
           </div>
           <div className="border rounded-lg p-5">
             <p className="font-semibold text-sm mb-1">Hours</p>
             <p className="text-sm text-gray-600">Mon–Fri: 8:00 AM – 6:00 PM</p>
-            <p className="text-sm text-gray-600">Sat: 9:00 AM – 2:00 PM</p>
+            <p className="text-sm text-gray-600">Sat: 9:00 AM – 4:00 PM</p>
           </div>
           <div className="border rounded-lg p-5">
             <p className="font-semibold text-sm mb-1">Order Help</p>

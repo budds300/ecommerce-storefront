@@ -22,6 +22,7 @@ Copy `.env.local.example` to `.env.local`. Variables in use across the code:
 - `NEXT_PUBLIC_SITE_NAME` — used in email templates / metadata
 - `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` — server-side SMTP (Truehost) for OTP + magic-link emails. Port `465` uses implicit TLS; `587` uses STARTTLS (`src/lib/mailer.ts`).
 - `EMAIL_FROM` — "from" address (falls back to `SMTP_USER`)
+- `SUPPORT_EMAIL_FROM` — from/to address for Contact page messages (`src/app/api/contact/route.ts`), falls back to `EMAIL_FROM` then `SMTP_USER`
 
 `NEXT_PUBLIC_*` vars are read in the browser; the rest are server-only (API routes).
 
