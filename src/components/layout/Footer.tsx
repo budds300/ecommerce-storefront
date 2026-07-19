@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const COLS = [
   { title: 'Shop', items: [{ label: 'All Products', href: '/products' }, { label: 'Deals', href: '/products' }, { label: 'New Arrivals', href: '/products' }] },
@@ -14,17 +15,23 @@ export function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr_1fr] gap-x-6 gap-y-10 sm:gap-8 mb-10 sm:mb-12">
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-              <span style={{ width: 32, height: 32, background: '#3b82f6', borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="18" height="18" stroke="#fff" strokeWidth="2" fill="none" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 12 12 4l9 8"/><path d="M5 10v10h14V10"/>
-                </svg>
-              </span>
-              <span style={{ fontWeight: 700, fontSize: 18, color: '#fff' }}>Soft Solutions Store</span>
+            <div style={{ display: 'inline-flex', alignItems: 'center', marginBottom: 16 }}>
+              <Image src="/soft-solutions-logo-dark.png" alt="Soft Solutions" width={721} height={240} style={{ height: 28, width: 'auto' }} />
             </div>
             <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.65, margin: 0 }}>
               Consumer technology, certified and shipped fast. Pay with M-Pesa or cash on delivery.
             </p>
+            <a
+              href="https://softsolutions.co.ke/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#8b93ff', textDecoration: 'none', marginTop: 12 }}
+            >
+              Visit softsolutions.co.ke
+              <svg width="13" height="13" stroke="currentColor" strokeWidth="2" fill="none" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/>
+              </svg>
+            </a>
             <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
               {['Twitter', 'Instagram', 'YouTube', 'Facebook'].map((s) => (
                 <a key={s} aria-label={s} href="#" style={{

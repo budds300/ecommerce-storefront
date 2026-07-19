@@ -68,7 +68,7 @@ export function ProductCard({ product }: ProductCardProps) {
       )}
       {isBackorder && inStock && (
         <span style={{
-          position: 'absolute', top: 10, left: 10, background: '#3b82f6', color: '#fff',
+          position: 'absolute', top: 10, left: 10, background: '#0423a0', color: '#fff',
           borderRadius: 9999, fontSize: 10, fontWeight: 600, padding: '2px 8px', zIndex: 2,
         }}>Pre-order</span>
       )}
@@ -102,7 +102,7 @@ export function ProductCard({ product }: ProductCardProps) {
           boxShadow: hov ? '0 4px 12px rgba(15,23,42,0.18)' : '0 2px 6px rgba(15,23,42,0.12)',
           cursor: wishlistLoading ? 'wait' : 'pointer', zIndex: 2,
           display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          color: wished ? '#ef4444' : hov ? '#3b82f6' : '#94a3b8',
+          color: wished ? '#ef4444' : hov ? '#0423a0' : '#94a3b8',
           transform: wished ? 'scale(1.15)' : hov ? 'scale(1.05)' : 'scale(1)',
           transition: 'color 200ms, box-shadow 200ms, transform 220ms cubic-bezier(0.34,1.56,0.64,1)',
           opacity: wishlistLoading ? 0.6 : 1,
@@ -142,7 +142,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Category eyebrow */}
       <div style={{
         fontSize: 10, fontWeight: 500, letterSpacing: '0.14em',
-        color: hov ? '#3b82f6' : '#94a3b8', textTransform: 'uppercase',
+        color: hov ? '#0423a0' : '#94a3b8', textTransform: 'uppercase',
         transition: 'color 200ms', position: 'relative', zIndex: 1,
       }}>
         {category || 'Product'}
@@ -212,7 +212,7 @@ function AddToCartButton({ disabled, label, onClick }: {
       disabled={disabled}
       style={{
         width: '100%', height: 44, border: 0, borderRadius: 10, padding: '0 16px',
-        background: disabled ? '#94a3b8' : bHov ? '#1e293b' : '#3b82f6',
+        background: disabled ? '#94a3b8' : bHov ? '#1e293b' : '#0423a0',
         color: '#fff', fontFamily: 'inherit', fontWeight: 600, fontSize: 13,
         letterSpacing: '0.02em', cursor: disabled ? 'not-allowed' : 'pointer',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,

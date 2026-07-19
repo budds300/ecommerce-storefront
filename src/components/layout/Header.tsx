@@ -1,12 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/store/cart';
 import { useCustomer } from '@/store/customer';
 import { useWishlist } from '@/store/wishlist';
 import { useEffect, useRef, useState } from 'react';
 import { MobileNav } from './MobileNav';
+
+const NAV_LINKS = [
+  { href: '/', label: 'Home' },
+  { href: '/products', label: 'Shop' },
+  { href: '/track', label: 'Track Order' },
+  { href: '/contact', label: 'Contact' },
+];
 
 export function Header() {
   const pathname = usePathname();
@@ -51,20 +59,47 @@ export function Header() {
             <MobileNav />
             {/* Logo */}
             <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none', flexShrink: 0 }}>
-            <span style={{
-              width: 32, height: 32, background: '#3b82f6', borderRadius: 8,
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-            }}>
-              <svg width="18" height="18" stroke="#fff" strokeWidth="2" fill="none" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12 12 4l9 8"/><path d="M5 10v10h14V10"/>
-              </svg>
-            </span>
-            <span style={{ fontWeight: 700, fontSize: 17, letterSpacing: '-0.01em', color: '#1e293b', whiteSpace: 'nowrap' }}>
-              Soft Solutions Store
-            </span>
+              <Image src="/soft-solutions-logo-light.png" alt="Soft Solutions" width={721} height={240} style={{ height: 32, width: 'auto', flexShrink: 0 }} priority />
             </Link>
           </div>
+
+          {/* Primary nav — hidden on mobile, which uses the MobileNav drawer instead */}
+          <nav className="hidden md:flex" style={{ alignItems: 'center', gap: 20 }}>
+            {NAV_LINKS.map((link) => {
+              const active = link.href === '/' ? pathname === '/' : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  style={{
+                    fontSize: 14, fontWeight: active ? 700 : 500,
+                    color: active ? '#0423a0' : '#1e293b',
+                    textDecoration: 'none', whiteSpace: 'nowrap',
+                  }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
         </div>
+
+        {/* Link to the main Soft Solutions site */}
+        <a
+          href="https://softsolutions.co.ke/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hidden md:inline-flex"
+          style={{
+            alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600,
+            color: '#0423a0', textDecoration: 'none', whiteSpace: 'nowrap',
+          }}
+        >
+          softsolutions.co.ke
+          <svg width="14" height="14" stroke="currentColor" strokeWidth="2" fill="none" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/>
+          </svg>
+        </a>
 
         {/* Search — wraps to its own full-width row on mobile; hidden on /products, which has its own search */}
         {!hideSearch && (
@@ -108,7 +143,7 @@ export function Header() {
               aria-label="Account"
             >
               {customer ? (
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#3b82f6' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#0423a0' }}>
                   {customer.first_name?.[0]?.toUpperCase() ?? '?'}
                 </span>
               ) : (
@@ -145,7 +180,7 @@ export function Header() {
               {totalItems > 0 && (
                 <span style={{
                   position: 'absolute', top: 4, right: 4, minWidth: 16, height: 16, padding: '0 4px',
-                  background: '#3b82f6', color: '#fff', borderRadius: 9999, fontSize: 10, fontWeight: 700,
+                  background: '#0423a0', color: '#fff', borderRadius: 9999, fontSize: 10, fontWeight: 700,
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                   transform: badgeBounce ? 'scale(1.3)' : 'scale(1)',
                   transition: 'transform 200ms cubic-bezier(0.34,1.56,0.64,1)',

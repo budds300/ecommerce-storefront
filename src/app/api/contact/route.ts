@@ -75,6 +75,30 @@ export async function POST(req: Request) {
 </html>`,
     });
 
+    // Best-effort acknowledgement to the customer — the support team has
+    // already received the message above, so a failure here shouldn't fail
+    // the whole request.
+    try {
+      await sendEmail({
+        to: email,
+        subject: `We've received your message — ${siteName}`,
+        text: `Hi ${name},\n\nThanks for reaching out to ${siteName}. We've received your message and will get back to you within 24 hours.\n\nYour message:\n${message}\n\n— ${siteName}`,
+        html: `<!DOCTYPE html>
+<html>
+<body style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
+  <h2 style="margin:0 0 8px 0;font-size:20px">${siteName}</h2>
+  <p style="color:#555;margin:0 0 24px 0;font-size:14px">We've received your message</p>
+  <p style="margin:0 0 16px 0;font-size:15px">Hi ${escapeHtml(name)},</p>
+  <p style="margin:0 0 16px 0;font-size:14px;color:#333">Thanks for reaching out — we've received your message and will get back to you within 24 hours.</p>
+  <p style="margin:0 0 8px 0;font-size:14px"><strong>Your message:</strong></p>
+  <p style="white-space:pre-wrap;font-size:14px;color:#333;border-left:3px solid #e5e7eb;padding-left:12px">${escapeHtml(message)}</p>
+</body>
+</html>`,
+      });
+    } catch (ackErr) {
+      console.error('Contact form acknowledgement email failed:', ackErr instanceof Error ? ackErr.message : ackErr);
+    }
+
     return Response.json({ success: true });
   } catch (err) {
     console.error('Contact form send error:', err instanceof Error ? err.message : err);

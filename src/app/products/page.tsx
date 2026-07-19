@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { sdk } from '@/lib/sdk';
 import { getRegionId } from '@/lib/region';
 import { ProductGrid } from '@/components/product/ProductGrid';
@@ -10,6 +11,51 @@ interface PageProps {
 }
 
 export const revalidate = 60;
+
+const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://store.softsolutions.co.ke';
+
+async function getCategoryName(categoryId: string): Promise<string | undefined> {
+  const { product_categories } = await sdk.store.category
+    .list({ id: [categoryId], fields: 'id,name', limit: 1 } as Record<string, unknown>)
+    .catch(() => ({ product_categories: [] }));
+  return product_categories[0]?.name;
+}
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams;
+  const page = parseInt(params.page ?? '1', 10);
+
+  if (params.search) {
+    return {
+      title: `Search results for "${params.search}"`,
+      description: `Products matching "${params.search}" at Soft Solutions Store.`,
+      robots: { index: false, follow: true },
+    };
+  }
+
+  if (params.category) {
+    const categoryName = await getCategoryName(params.category);
+    const title = categoryName ? `${categoryName} — Shop Online in Kenya` : 'Shop by Category';
+    const description = categoryName
+      ? `Browse ${categoryName} at Soft Solutions Store. Fast delivery across Kenya, pay with M-Pesa or cash on delivery.`
+      : 'Browse products by category at Soft Solutions Store.';
+
+    return {
+      title,
+      description,
+      alternates: { canonical: `${SITE_URL}/products?category=${params.category}` },
+      robots: page > 1 ? { index: false, follow: true } : undefined,
+      openGraph: { title, description, type: 'website', url: `${SITE_URL}/products?category=${params.category}` },
+    };
+  }
+
+  return {
+    title: 'All Products',
+    description: 'Shop the full catalogue at Soft Solutions Store — consumer electronics and tech, fast delivery across Kenya.',
+    alternates: { canonical: `${SITE_URL}/products` },
+    robots: page > 1 ? { index: false, follow: true } : undefined,
+  };
+}
 
 const CAT_ICON = (
   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
@@ -62,7 +108,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                   display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px',
                   borderRadius: 8, fontSize: 13, fontWeight: !params.category ? 600 : 500,
                   color: !params.category ? '#fff' : '#1e293b',
-                  background: !params.category ? '#3b82f6' : 'transparent',
+                  background: !params.category ? '#0423a0' : 'transparent',
                   textDecoration: 'none',
                 }}
               >
@@ -79,7 +125,7 @@ export default async function ProductsPage({ searchParams }: PageProps) {
                     display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px',
                     borderRadius: 8, fontSize: 13, fontWeight: params.category === cat.id ? 600 : 500,
                     color: params.category === cat.id ? '#fff' : '#1e293b',
-                    background: params.category === cat.id ? '#3b82f6' : 'transparent',
+                    background: params.category === cat.id ? '#0423a0' : 'transparent',
                     textDecoration: 'none',
                     textTransform: 'capitalize',
                   }}

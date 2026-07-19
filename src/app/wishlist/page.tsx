@@ -46,7 +46,7 @@ export default function WishlistPage() {
         <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1e293b', margin: 0 }}>
           Wishlist {count > 0 && <span style={{ color: '#64748b', fontWeight: 400, fontSize: 18 }}>({count})</span>}
         </h1>
-        <Link href="/products" style={{ fontSize: 13, color: '#3b82f6', textDecoration: 'underline' }}>
+        <Link href="/products" style={{ fontSize: 13, color: '#0423a0', textDecoration: 'underline' }}>
           Browse products
         </Link>
       </div>
@@ -137,7 +137,7 @@ export default function WishlistPage() {
                     }}
                     style={{
                       height: 40, padding: '0 16px', border: 0, borderRadius: 8,
-                      background: '#3b82f6', color: '#fff', fontFamily: 'inherit',
+                      background: '#0423a0', color: '#fff', fontFamily: 'inherit',
                       fontWeight: 600, fontSize: 13, cursor: 'pointer',
                     }}
                   >

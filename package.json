@@ -13,6 +13,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@medusajs/js-sdk": "^2.14.1",
     "@medusajs/types": "^2.14.1",
+    "@next/third-parties": "^14.2.35",
     "axios": "^1.15.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

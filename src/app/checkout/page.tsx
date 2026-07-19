@@ -11,6 +11,7 @@ import { useCart } from '@/store/cart';
 import { useCustomer } from '@/store/customer';
 import { sdk } from '@/lib/sdk';
 import { formatKES } from '@/lib/utils';
+import { trackPurchase } from '@/lib/analytics';
 
 type ShippingOption = { id: string; name: string; amount: number | null; fulfillmentSetType: string };
 type DeliveryType = 'delivery' | 'pickup';
@@ -295,6 +296,16 @@ export default function CheckoutPage() {
         if (session?.status === 'captured' || session?.status === 'authorized') {
           const result = await sdk.store.cart.complete(mpesaCartId);
           if (result.type === 'order' && result.order) {
+            trackPurchase({
+              transactionId: String(result.order.display_id),
+              value: total,
+              items: items.map((i) => ({
+                item_id: i.product.id,
+                item_name: i.title,
+                price: i.price,
+                quantity: i.quantity,
+              })),
+            });
             clearCart();
             clearDraft();
             router.push(`/order-confirmation?order=${result.order.display_id}&method=mpesa`);
@@ -479,6 +490,16 @@ export default function CheckoutPage() {
       const result = await sdk.store.cart.complete(cart.id);
 
       if (result.type === 'order' && result.order) {
+        trackPurchase({
+          transactionId: String(result.order.display_id),
+          value: total,
+          items: items.map((i) => ({
+            item_id: i.product.id,
+            item_name: i.title,
+            price: i.price,
+            quantity: i.quantity,
+          })),
+        });
         clearCart();
         clearDraft();
         router.push(
@@ -557,14 +578,14 @@ export default function CheckoutPage() {
                     </span>
                   </>
                 ) : (
-                  <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ background: '#eef0fa', border: '1px solid #c3c9ed', borderRadius: 10, padding: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <svg style={{ width: 20, height: 20, color: '#3b82f6', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg style={{ width: 20, height: 20, color: '#0423a0', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                       </svg>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: '#1e40af' }}>Check your inbox</span>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: '#00156b' }}>Check your inbox</span>
                     </div>
-                    <p style={{ fontSize: 12, color: '#1d4ed8', margin: 0, paddingLeft: 28 }}>
+                    <p style={{ fontSize: 12, color: '#00156b', margin: 0, paddingLeft: 28 }}>
                       We sent a 6-digit code to <strong>{customerEmail}</strong>. Enter it below to confirm your email.
                     </p>
                     <div style={{ display: 'flex', gap: 8, paddingLeft: 28 }}>
@@ -596,7 +617,7 @@ export default function CheckoutPage() {
                         type="button"
                         disabled={otpSending || countdown > 0}
                         onClick={handleSendOtp}
-                        style={{ fontSize: 12, color: '#3b82f6', background: 'none', border: 0, cursor: countdown > 0 ? 'not-allowed' : 'pointer', textDecoration: 'underline', opacity: countdown > 0 ? 0.5 : 1 }}
+                        style={{ fontSize: 12, color: '#0423a0', background: 'none', border: 0, cursor: countdown > 0 ? 'not-allowed' : 'pointer', textDecoration: 'underline', opacity: countdown > 0 ? 0.5 : 1 }}
                       >
                         {countdown > 0 ? `Resend in ${countdown}s` : "Didn't receive it? Resend"}
                       </button>

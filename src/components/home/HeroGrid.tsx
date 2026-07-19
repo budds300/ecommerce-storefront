@@ -49,8 +49,8 @@ function HeroProductSVG({ variant }: { variant: number }) {
     <svg width="280" height="240" viewBox="0 0 280 240" fill="none">
       <ellipse cx="140" cy="180" rx="120" ry="14" fill="#e2e8f0"/>
       <path d="M40 100 Q40 60 90 60 L190 60 Q240 60 240 100 L240 150 Q240 170 220 170 L60 170 Q40 170 40 150 Z" fill={fills[variant % 3]}/>
-      <rect x="80" y="100" width="50" height="36" rx="6" fill="#3b82f6"/>
-      <rect x="150" y="100" width="50" height="36" rx="6" fill="#3b82f6"/>
+      <rect x="80" y="100" width="50" height="36" rx="6" fill="#0423a0"/>
+      <rect x="150" y="100" width="50" height="36" rx="6" fill="#0423a0"/>
       <rect x="60" y="80" width="160" height="6" rx="3" fill="#fff" opacity="0.5"/>
     </svg>
   );
@@ -101,8 +101,8 @@ function EarbudsSVG() {
     <svg width="100" height="80" viewBox="0 0 100 80" fill="none">
       <ellipse cx="50" cy="68" rx="40" ry="5" fill="#e2e8f0"/>
       <rect x="18" y="22" width="64" height="34" rx="14" fill="#1e293b"/>
-      <circle cx="34" cy="39" r="9" fill="#3b82f6"/>
-      <circle cx="66" cy="39" r="9" fill="#3b82f6"/>
+      <circle cx="34" cy="39" r="9" fill="#0423a0"/>
+      <circle cx="66" cy="39" r="9" fill="#0423a0"/>
     </svg>
   );
 }

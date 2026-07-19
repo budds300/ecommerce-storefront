@@ -27,7 +27,7 @@ function CTProjector() {
     <svg width="28" height="22" viewBox="0 0 80 60" fill="none">
       <rect x="6" y="14" width="68" height="34" rx="6" fill="#cbd5e1"/>
       <circle cx="26" cy="31" r="12" fill="#475569"/>
-      <circle cx="26" cy="31" r="5" fill="#3b82f6"/>
+      <circle cx="26" cy="31" r="5" fill="#0423a0"/>
       <rect x="46" y="22" width="14" height="4" rx="2" fill="#94a3b8"/>
     </svg>
   );
@@ -64,8 +64,8 @@ function CTEarbuds() {
   return (
     <svg width="28" height="22" viewBox="0 0 80 60" fill="none">
       <rect x="20" y="22" width="40" height="22" rx="10" fill="#1e293b"/>
-      <circle cx="30" cy="33" r="6" fill="#3b82f6"/>
-      <circle cx="50" cy="33" r="6" fill="#3b82f6"/>
+      <circle cx="30" cy="33" r="6" fill="#0423a0"/>
+      <circle cx="50" cy="33" r="6" fill="#0423a0"/>
     </svg>
   );
 }

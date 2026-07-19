@@ -96,7 +96,7 @@ export function CategoryFilterDrawer({
                   display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
                   borderRadius: 8, fontSize: 13, fontWeight: !activeCategoryId ? 600 : 500,
                   color: !activeCategoryId ? '#fff' : '#1e293b',
-                  background: !activeCategoryId ? '#3b82f6' : 'transparent',
+                  background: !activeCategoryId ? '#0423a0' : 'transparent',
                   textDecoration: 'none',
                 }}
               >
@@ -112,7 +112,7 @@ export function CategoryFilterDrawer({
                     display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
                     borderRadius: 8, fontSize: 13, fontWeight: activeCategoryId === cat.id ? 600 : 500,
                     color: activeCategoryId === cat.id ? '#fff' : '#1e293b',
-                    background: activeCategoryId === cat.id ? '#3b82f6' : 'transparent',
+                    background: activeCategoryId === cat.id ? '#0423a0' : 'transparent',
                     textDecoration: 'none', textTransform: 'capitalize',
                   }}
                 >
